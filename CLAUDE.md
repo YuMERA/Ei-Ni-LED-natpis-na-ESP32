@@ -79,8 +79,14 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
 **Podaci od korisnika:**
 - Panel je **64×8**: 8× MC14015 (po 8 kolona) = 64 kolone.
 - Kolone: 64× **BC212** (PNP, ~100 mA) — prekidač kolone na plus strani.
-- Redovi: 8× **2N6388** (NPN Darlington, TO-220, 10 A) — verovatno na minus
-  strani (emiter na GND), nije izmereno.
+- Redovi: 8× **2N6388** (NPN Darlington, TO-220, 10 A) **na plus strani kao
+  emiter-folower**: kolektor na +9 V, emiter na red LED-ova (izmerio
+  korisnik). Napon reda je otprilike napon baze minus ~1,4 V. Šta je vuklo
+  bazu na staroj ploči (R1–R11 + skinuti 1852?) nije utvrđeno.
+- Iz toga sledi da su BC212 (PNP) na minus strani kolona: verovatno
+  emiter na katode, kolektor na GND, baza direktno sa izlaza 4015. Na modulu
+  nema otpornika, pa struju LED-ova određuju naponi drajvera — nova ploča
+  mora da zadrži slične uslove (meriti napon reda na panelu B).
 - Napajanje po uputstvu: **9 V ±1 V, max 1,2 A (~11 W)**. Pri punom redu
   to je oko 1,2 A / 64 ≈ 19 mA po LED-u u impulsu.
 - PCB se crta u **EasyEDA**.
@@ -88,12 +94,17 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
 Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8). Ako je 9 V,
 VIH je ~6,3 V, pa treba pomerač 3,3 → 9 V (npr. CD40109B ili MOSFET sa
 pull-up-om), a ne 74HCT. Takođe otvoreno: raspored 5 lemnih tačaka na ulazu
-modula (koristi li se RESET 4015), da li je emiter 2N6388 na GND, dimenzije
-stare ploče.
+modula (koristi li se RESET 4015), dimenzije stare ploče. Slika ulaza
+modula (`foto/20261021_180544.heic`) ne otkriva raspored — tačke nisu
+obeležene, treba ih proveriti multimetrom prema pinovima 4015 (MC14015:
+CLK A = 9, DATA A = 7, RESET A = 6, VSS = 8, VDD = 16).
 
 Predlog za novu ploču (dok merenja ne potvrde):
-- Redovi: 8× logic-level N-MOSFET (SOT-23, ~5 A, Vgs(th) ≤ 1,5 V), gejt
-  direktno sa ESP32 preko ~100 Ω, pull-down 100 kΩ. Manji pad od Darlingtona.
+- Redovi: zadržati 8× 2N6388 na nosaču kao emiter-folowere. Baza preko
+  otpornika (~4,7 kΩ) na +9 V, a ULN2803 je spušta na masu (ESP32 visoko =
+  red ugašen). Vrednost otpornika potvrditi merenjem na panelu B.
+  (Ranija ideja sa N-MOSFET-om na minus strani je pogrešna — redovi su na
+  plus strani.)
 - Napajanje: 9 V ulaz; LED struja ide direktno sa 9 V kroz BC212. Logika
   preko buck regulatora 9 → 5 V (ne LDO: 9 → 3,3 V pri ~0,5 A za WiFi je
   ~3 W toplote), ESP32 DevKit na 5 V, Schottky dioda da USB ne napaja 9 V
