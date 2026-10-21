@@ -106,11 +106,12 @@ Nova ploča: širina **90 mm** (žlebovi za logiku), dužina slobodna. Detaljan
 predlog šeme: `hardver/ploca.md`.
 
 Predlog za novu ploču (dok merenja ne potvrde):
-- Redovi: zadržati 8× 2N6388 na nosaču kao emiter-folowere. Baza preko
-  otpornika (~4,7 kΩ) na +9 V, a ULN2803 je spušta na masu (ESP32 visoko =
-  red ugašen). Vrednost otpornika potvrditi merenjem na panelu B.
-  (Ranija ideja sa N-MOSFET-om na minus strani je pogrešna — redovi su na
-  plus strani.)
+- Redovi: zadržati 8× 2N6388 na nosaču kao emiter-folowere. Original je
+  vukao baze sa CDP1852 (5 V) preko **8× 220 Ω** (pročitano sa slike iz
+  2018), pa je red ≈ 3,5 V — to ograničava struju LED-ova. Nova ploča:
+  74HCT245 na 5 V → 220 Ω → baza, 10 kΩ baza–GND, /OE sa pull-up-om kao
+  glavni prekidač. **Baze ne vući na 9 V.** (Ranije ideje — N-MOSFET na
+  minus strani i ULN2803 sa pull-up-om na 9 V — su pogrešne.)
 - Napajanje: 9 V ulaz; LED struja ide direktno sa 9 V kroz BC212. Logika
   preko buck regulatora 9 → 5 V (ne LDO: 9 → 3,3 V pri ~0,5 A za WiFi je
   ~3 W toplote), ESP32 DevKit na 5 V, Schottky dioda da USB ne napaja 9 V

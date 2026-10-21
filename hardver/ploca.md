@@ -18,11 +18,11 @@ Ovo je predlog za crtanje; ništa još nije probano na panelu.
  9 V ─► J1 ─► Q1 (zaštita od obrnutog polariteta) ─► +9V ──┬─► C1 1000 µF
                                                             ├─► U1 buck 9→5 V ─► +5V ─► D1 ─► ESP32 5V
                                                             ├─► JP1 (VDD_MOD = 5 V ili 9 V)
-                                                            └─► Q2 (P-MOSFET, ROW_EN) ─► +9V_ROW
+                                                            └─► J3 kolektori 2N6388
 
  ESP32 ─ SPI CLK/MOSI, RESET ─► U2 CD40109B ─► J2 modul (VDD_MOD, GND, DATA, CLK, RESET)
- ESP32 ─ ROW1..8 ─► U3 ULN2803 ─► baze 2N6388 (pull-up 8× R na +9V_ROW) ─► J3
- ESP32 ─ ROW_EN ─► Q3 2N7002 ─► gejt Q2
+ ESP32 ─ ROW1..8 ─► U3 74HCT245 (5 V) ─► 8× 220 Ω ─► J3 baze 2N6388
+ ESP32 ─ ROW_OE ─► /OE U3 (pull-up: isključeno pri paljenju)
 ```
 
 ## Napajanje
@@ -47,8 +47,8 @@ napaja CD40109B (strana VCC).
 | CLK | 18 (VSPI SCK) | U2 → J2 CLK |
 | DATA | 23 (VSPI MOSI) | U2 → J2 DATA |
 | RESET | 4 | U2 → J2 RESET |
-| ROW_EN | 17 | Q3 → Q2 |
-| ROW1–ROW8 | 13, 14, 25, 26, 27, 32, 33, 16 | U3 ulazi 1–8 |
+| ROW_OE | 17 | /OE na U3 (0 = redovi uključeni) |
+| ROW1–ROW8 | 13, 14, 25, 26, 27, 32, 33, 16 | U3 ulazi A1–A8 |
 | (opciono) svetlo | 34 | foto-otpornik + 10 kΩ, automatska svetlina |
 
 Izbegnuti su pinovi fleša (6–11) i strapping pinovi 0, 2, 5, 12, 15.
@@ -63,28 +63,26 @@ Izbegnuti su pinovi fleša (6–11) i strapping pinovi 0, 2, 5, 12, 15.
 - RESET: pull-down 100 kΩ na ESP32 strani.
 - 100 nF uz VCC i uz VDD.
 
-## Redovi — ULN2803 (U3) + postojeći 2N6388
+## Redovi — 74HCT245 (U3) + postojeći 2N6388
 
-- 2N6388 ostaju na aluminijumskom nosaču, kolektori na +9V_ROW, emiteri
-  žutim žicama na redove modula (kao i sada).
-- Baza svakog 2N6388: otpornik ka +9V_ROW (pull-up, **predlog 4,7 kΩ**;
-  ako se na panelu B mogu pročitati originalni otpornici R1–R11, uzeti te
-  vrednosti) i izlaz ULN2803 ka masi.
-- **Logika je obrnuta:** ROWx = 1 → ULN vuče bazu dole → red ugašen.
-  Aktivan red je onaj čiji je pin 0.
+Original (slika iz 2018): baze 2N6388 je vukao CDP1852 sa 5 V logike preko
+**8× 220 Ω** (crvena-crvena-braon). 2N6388 je emiter-folower, pa je napon
+reda ≈ 5 V − 2×Vbe ≈ **3,5 V**. Na modulu nema otpornika za LED — upravo taj
+napon ograničava struju. **Baze se ne smeju vući na 9 V**: red bi dobio
+~7,5 V i LED-ovi bi dobili višestruko veću struju.
 
-## Glavni prekidač redova — Q2/Q3
-
-Problem: pri uključenju ESP32 pinovi su 0 ili plutaju, ULN je isključen, pa
-bi bez ovoga **svih 8 redova bilo upaljeno odjednom** sa nasumičnim
-kolonama — 8× veća prosečna struja od predviđene.
-
-- Q2: AO3407A (P-MOSFET), source na +9V, drain = +9V_ROW (kolektori i
-  pull-up otpornici baza).
-- Gejt Q2: 10 kΩ ka source-u (podrazumevano isključen), drain Q3 ga spušta.
-- Q3: 2N7002, gejt sa ROW_EN preko 100 Ω, pull-down 100 kΩ.
-- ROW_EN = 1 → redovi imaju napajanje. Isti pin služi za gašenje dok se
-  podaci pomeraju kroz 4015 i za PWM svetline.
+- 2N6388 ostaju na aluminijumskom nosaču, kolektori na +9V, emiteri žutim
+  žicama na redove modula (kao i sada). Grejanje je normalno: ~5 V pada na
+  njima, zato je tu nosač.
+- U3 = 74HCT245 na **+5V**, DIR na +5V (A → B). Izlazi B1–B8 preko 220 Ω
+  na baze (isto kao original).
+- Na svakoj bazi 10 kΩ ka GND — kad je U3 isključen (/OE = 1), izlazi
+  plutaju, pa otpornik drži red ugašenim.
+- /OE: 10 kΩ ka +5V → pri paljenju ESP32 svi redovi su ugašeni. Ovim se
+  rešava problem da bi pri startu svih 8 redova moglo da se upali odjednom.
+- Logika je prava: ROWx = 1 → red upaljen.
+- ROW_OE istovremeno služi za gašenje dok se podaci pomeraju kroz 4015 i
+  za PWM svetline.
 
 ## Konektori
 
@@ -92,22 +90,24 @@ kolonama — 8× veća prosečna struja od predviđene.
 |---|---|---|
 | J1 | +9V, GND | DC utičnica + klema |
 | J2 | VDD_MOD, GND, DATA, CLK, RESET | JST-XH 5-pin |
-| J3 | +9V_ROW, BAZA1–BAZA8 | JST-XH 9-pin (ili 10 sa GND) |
+| J3 | +9V (kolektori), BAZA1–BAZA8 | JST-XH 9-pin (ili 10 sa GND); +9V nosi do 1,2 A |
 
 Žice panela se kasnije rasporede u ženske konektore.
 
 ## Redosled u firmware-u (za jedan red)
 
-1. ROW_EN = 0 (sve ugašeno).
+1. ROW_OE = 1 (sve ugašeno).
 2. Poslati 64 bita kroz SPI (~1 MHz → 64 µs).
-3. ROW1–8: aktivni red = 0, ostali = 1.
-4. ROW_EN = 1 (ili PWM) do sledećeg reda.
+3. ROW1–8: aktivni red = 1, ostali = 0.
+4. ROW_OE = 0 (ili PWM) do sledećeg reda.
 
 8 redova × 100 Hz = jedan red na 1,25 ms; pomeranje uzima ~5 % vremena.
 
 ## Šta još treba proveriti
 
 - VDD na 4015 (pin 16 prema pinu 8) na panelu B — određuje JP1.
+- Da je CDP1852 zaista radio na 5 V (pin 24 prema pinu 12 na panelu B).
+  Ako je bio na 9 V, U3 mora biti 4000-serija na 9 V, ne 74HCT.
 - Polaritet kolona: da li BC212 provodi kad je izlaz 4015 nizak (verovatno)
   — rešava se u firmware-u, bez izmene ploče.
 - Struja: na modulu nema otpornika za LED, pa prvo paliti uz izvor sa
