@@ -12,14 +12,14 @@ na ESP32, plus meteo podaci kao jedna od stavki.
 
 Panel: jednoredni crveni dot-matrix u dugačkom kućištu.
 
-O ovom modelu nema podataka na internetu. Korisnik ima originalnu
-dokumentaciju: „Priručnik programiranja“ i „Uputstvo za instaliranje“.
-Iz njih, kao i iz slika unutrašnjosti, utvrditi rezoluciju, interfejs i
-protokol.
+O ovom modelu nema podataka na internetu. Uz panel je išao zaseban kontroler
+sa tastaturom za unos teksta; korisnik ga nema. Postoje originalni
+„Priručnik programiranja“ i „Uputstvo za instaliranje“, ali se odnose na rad
+sa tim kontrolerom, pa nisu primarni izvor.
 
-Alternativa koju treba odmeriti kad se vidi priručnik: ako stara elektronika
-radi i panel prima poruke serijski (RS-232/RS-485), ESP32 može da ostane
-spolja i da šalje poruke po originalnom protokolu, bez diranja ploče.
+Odluka korisnika: zadržati horizontalne/vertikalne drajvere za LED, a logiku
+zameniti sa ESP32 (unos poruka preko web panela/USB). Sve se utvrđuje iz
+slika ploče.
 
 ## Pravila
 
