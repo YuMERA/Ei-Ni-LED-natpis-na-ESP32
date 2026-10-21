@@ -21,6 +21,14 @@ Odluka korisnika: zadržati horizontalne/vertikalne drajvere za LED, a logiku
 zameniti sa ESP32 (unos poruka preko web panela/USB). Sve se utvrđuje iz
 slika ploče.
 
+Korisnik ima **dva panela**:
+- **Panel A** — započeto rasklapanje: deo MCU komponenti je davno skinut.
+  Ovaj se prepravlja.
+- **Panel B** — netaknut i radi: po uključenju ispisuje ranije isprogramirane
+  poruke (dakle u samom panelu postoji MCU i memorija). Služi kao referenca:
+  na njemu se, dok radi, logičkim analizatorom snimaju DATA/CLK/LATCH/OE i
+  izbor reda. Ne dirati ga dok se signali ne snime.
+
 ## Pravila
 
 **Ne pokretati Arduino kompajliranje.** Korisnik ga radi sam. Piši izmene, ali
