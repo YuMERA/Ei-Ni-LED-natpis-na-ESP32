@@ -102,6 +102,9 @@ DATA A = 7, RESET A = 6, VSS = 8, VDD = 16). DATA/CLK/RESET idu preko
 VDD_MOD 5 V i ako je 9 V; VDD_MOD se bira kratkospojnikom. RESET drži
 pull-down (aktivan je na visokom nivou), ESP32 ga može pulsirati.
 
+Nova ploča: širina **90 mm** (žlebovi za logiku), dužina slobodna. Detaljan
+predlog šeme: `hardver/ploca.md`.
+
 Predlog za novu ploču (dok merenja ne potvrde):
 - Redovi: zadržati 8× 2N6388 na nosaču kao emiter-folowere. Baza preko
   otpornika (~4,7 kΩ) na +9 V, a ULN2803 je spušta na masu (ESP32 visoko =
