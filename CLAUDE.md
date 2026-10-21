@@ -76,9 +76,29 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
   uključi njegov TO-220. Pošto 4015 nema latch, redovi moraju biti ugašeni
   dok traje pomeranje.
 
-Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8), broj modula
-i ukupan broj kolona, tip i polaritet TO-220 tranzistora, kuda tačno idu
-DATA/CLK sa MCU ploče.
+**Podaci od korisnika:**
+- Panel je **64×8**: 8× MC14015 (po 8 kolona) = 64 kolone.
+- Kolone: 64× **BC212** (PNP, ~100 mA) — prekidač kolone na plus strani.
+- Redovi: 8× **2N6388** (NPN Darlington, TO-220, 10 A) — verovatno na minus
+  strani (emiter na GND), nije izmereno.
+- Napajanje po uputstvu: **9 V ±1 V, max 1,2 A (~11 W)**. Pri punom redu
+  to je oko 1,2 A / 64 ≈ 19 mA po LED-u u impulsu.
+- PCB se crta u **EasyEDA**.
+
+Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8). Ako je 9 V,
+VIH je ~6,3 V, pa treba pomerač 3,3 → 9 V (npr. CD40109B ili MOSFET sa
+pull-up-om), a ne 74HCT. Takođe otvoreno: raspored 5 lemnih tačaka na ulazu
+modula (koristi li se RESET 4015), da li je emiter 2N6388 na GND, dimenzije
+stare ploče.
+
+Predlog za novu ploču (dok merenja ne potvrde):
+- Redovi: 8× logic-level N-MOSFET (SOT-23, ~5 A, Vgs(th) ≤ 1,5 V), gejt
+  direktno sa ESP32 preko ~100 Ω, pull-down 100 kΩ. Manji pad od Darlingtona.
+- Napajanje: 9 V ulaz; LED struja ide direktno sa 9 V kroz BC212. Logika
+  preko buck regulatora 9 → 5 V (ne LDO: 9 → 3,3 V pri ~0,5 A za WiFi je
+  ~3 W toplote), ESP32 DevKit na 5 V, Schottky dioda da USB ne napaja 9 V
+  granu.
+- Pre pomeranja reda kroz 4015 ugasiti sve redove (nema latch-a).
 
 **Odluka korisnika — nova PCB:** stara MCU ploča se izbacuje cela. Nova ploča
 iste širine kao stara, da ulazi u iste žlebove kućišta. Na njoj: napajanje,
