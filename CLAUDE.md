@@ -5,13 +5,21 @@ Tekst za korisnika ide sa dijakritikom; komentari u firmware-u su bez nje.
 
 ## Cilj
 
-Prepravka starog LED panela Ei Niš (nalepnica: „INF 1505“ ili „1508“, cifra
-nije čitljiva) — izbaciti originalni MCU deo i panel pogoniti sa ESP32.
-Namena: skrolujući natpis sa porukama koje se unose preko web panela na ESP32,
-plus meteo podaci kao jedna od stavki.
+Prepravka starog LED panela Ei Niš, model **INFOS 1802** (ranije pogrešno
+pročitano kao „INF 1505/1508“) — izbaciti originalni MCU deo i panel pogoniti
+sa ESP32. Namena: skrolujući natpis sa porukama koje se unose preko web panela
+na ESP32, plus meteo podaci kao jedna od stavki.
 
-O ovom modelu nema podataka na internetu (pretraga ništa nije našla). Sve se
-utvrđuje iz same ploče — korisnik će poslati slike unutrašnjosti.
+Panel: jednoredni crveni dot-matrix u dugačkom kućištu.
+
+O ovom modelu nema podataka na internetu. Korisnik ima originalnu
+dokumentaciju: „Priručnik programiranja“ i „Uputstvo za instaliranje“.
+Iz njih, kao i iz slika unutrašnjosti, utvrditi rezoluciju, interfejs i
+protokol.
+
+Alternativa koju treba odmeriti kad se vidi priručnik: ako stara elektronika
+radi i panel prima poruke serijski (RS-232/RS-485), ESP32 može da ostane
+spolja i da šalje poruke po originalnom protokolu, bez diranja ploče.
 
 ## Pravila
 
