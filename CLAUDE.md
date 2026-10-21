@@ -39,20 +39,50 @@ reci šta nisi mogao da proveriš.
 **Server se ne menja odavde.** Meteo podaci dolaze iz Output API-ja u
 `../mera-HUB-app` (`GET /api/output/:id`, token u `x-mera-output-token`).
 
-## Pretpostavke o hardveru (proveriti na slikama)
+## Hardver — utvrđeno sa slika (2026-10-21)
 
-Tipično za panele iz tog perioda:
-- Kolone: lanac pomeračkih registara (CD4094, 74LS164/74HC595, UCN5821/5895),
-  ulančanih po modulima.
-- Redovi: multipleks preko dekodera (74LS138/74LS145) i tranzistora
-  (BD140, TIP127, ULN2803), 1/7 ili 1/8.
-- Logika: 8051/Z80/6502 + EPROM + SRAM — to se izbacuje.
-- Interfejs MCU → LED moduli: DATA, CLK, LATCH, OE i A0–A2 (izbor reda).
+Slike su u `foto/` (HEIC sa Samsung telefona, ne ide u git). Konverzija u JPG
+radi preko WPF dekodera u PowerShell-u (`BitmapDecoder` → `JpegBitmapEncoder`),
+Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
+400×180 — za čitanje oznaka uvek koristiti originale iz `foto/`.
+
+**MCU ploča** (oznaka „5359155 A-U1“), sve CMOS, RCA COSMAC familija:
+- CDP1802ACE — CPU (RCA 1802).
+- NMC27C64Q — EPROM 8K, nalepnica „INF 1802/08 V.2.0“ (odatle ranija zabuna
+  oko „1505/1508“).
+- Prazno mesto „6264“ — SRAM 8K (poruke); 4 prazna ležišta „1,2V“ —
+  NiCd baterija za čuvanje RAM-a. Nije potvrđeno da li ih je korisnik skinuo.
+- CDP1852CE — 8-bitni I/O port; pored njega prazno mesto „1852“ za još jedan,
+  sa vodovima ka tranzistorima redova (možda skinut).
+- CDP1853CE — dekoder 1-od-8 (N linije 1802).
+- CDP1854ACE — UART; MAX232 — RS-232 nivoi; HD-4702 (Harris) — generator
+  baud-a, kristal 2,4576 MHz, kratkospojnici „1200“/„9600“. Tuda je
+  stizao tekst sa spoljnog kontrolera sa tastaturom.
+- TC4049BP (inverter/bafer), 2× HCF4042BE (D latch), HCF4013BE (D FF).
+- LT7805CV — 5 V za logiku.
+- Redovi: 8 TO-220 tranzistora T1–T8 (T1/3/5/7 na ploči, T2/4/6/8 na
+  aluminijumskom nosaču uz ivicu). Oznaka tipa nije pročitana. Do redova na
+  modulima idu žute žice.
+
+**LED modul** (oznaka „5357996“, datum „29 89“):
+- 8 redova (8 LED po visini) — font iz `mera-ledMatrix` odgovara.
+- Kolone: MC14015BCP (dvostruki 4-bitni pomerački registar, **bez izlaznog
+  latch-a**), jedan čip na 8 kolona; svaka kolona ima svoj TO-92 tranzistor.
+- 5 lemnih tačaka na kraju modula — verovatno ulaz lanca (VDD, GND, DATA,
+  CLK, RESET?), nije potvrđeno.
+- Šema je dakle multipleks redova 1/8: kroz lanac 4015 se upiše red, pa se
+  uključi njegov TO-220. Pošto 4015 nema latch, redovi moraju biti ugašeni
+  dok traje pomeranje.
+
+Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8), broj modula
+i ukupan broj kolona, tip i polaritet TO-220 tranzistora, kuda tačno idu
+DATA/CLK sa MCU ploče.
 
 Plan:
 1. Naći konektor između MCU ploče i LED modula, identifikovati signale
    (po mogućstvu logičkim analizatorom dok stara elektronika radi).
-2. Prilagođavanje 3,3 V → 5 V (74HCT245 / 74AHCT125).
+2. Prilagođavanje 3,3 V → 5 V (74HCT245 / 74AHCT125) — 4015 na 5 V traži
+   VIH ≥ 3,5 V, pa ESP32 direktno nije dovoljan.
 3. Firmware: SPI (DMA) za kolone, tajmer za multipleks redova na jezgru 1,
    osvežavanje ≥ ~100 Hz.
 4. Web panel: lista poruka (tekst, brzina, smer, trajanje) u LittleFS/
