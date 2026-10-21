@@ -50,10 +50,12 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
 - CDP1802ACE — CPU (RCA 1802).
 - NMC27C64Q — EPROM 8K, nalepnica „INF 1802/08 V.2.0“ (odatle ranija zabuna
   oko „1505/1508“).
-- Prazno mesto „6264“ — SRAM 8K (poruke); 4 prazna ležišta „1,2V“ —
-  NiCd baterija za čuvanje RAM-a. Nije potvrđeno da li ih je korisnik skinuo.
+- Prazno mesto „6264“ — SRAM 8K (poruke), skinuo ga je korisnik. 4 ležišta
+  „1,2V“ za NiCd bateriju — baterija nikad nije ni bila.
 - CDP1852CE — 8-bitni I/O port; pored njega prazno mesto „1852“ za još jedan,
-  sa vodovima ka tranzistorima redova (možda skinut).
+  sa vodovima ka tranzistorima redova (skinuo korisnik).
+- Slikana ploča je iz **panela A** (rasturenog). LED moduli na njemu nisu
+  dirani.
 - CDP1853CE — dekoder 1-od-8 (N linije 1802).
 - CDP1854ACE — UART; MAX232 — RS-232 nivoi; HD-4702 (Harris) — generator
   baud-a, kristal 2,4576 MHz, kratkospojnici „1200“/„9600“. Tuda je
@@ -77,6 +79,11 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
 Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8), broj modula
 i ukupan broj kolona, tip i polaritet TO-220 tranzistora, kuda tačno idu
 DATA/CLK sa MCU ploče.
+
+**Odluka korisnika — nova PCB:** stara MCU ploča se izbacuje cela. Nova ploča
+iste širine kao stara, da ulazi u iste žlebove kućišta. Na njoj: napajanje,
+ESP32, prilagođavanje nivoa i drajveri redova; žice panela se prelemljuju na
+nju. LED moduli ostaju netaknuti.
 
 Plan:
 1. Naći konektor između MCU ploče i LED modula, identifikovati signale
