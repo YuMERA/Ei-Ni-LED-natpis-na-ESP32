@@ -91,13 +91,16 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
   to je oko 1,2 A / 64 ≈ 19 mA po LED-u u impulsu.
 - PCB se crta u **EasyEDA**.
 
-Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8). Ako je 9 V,
-VIH je ~6,3 V, pa treba pomerač 3,3 → 9 V (npr. CD40109B ili MOSFET sa
-pull-up-om), a ne 74HCT. Takođe otvoreno: raspored 5 lemnih tačaka na ulazu
-modula (koristi li se RESET 4015), dimenzije stare ploče. Slika ulaza
-modula (`foto/20261021_180544.heic`) ne otkriva raspored — tačke nisu
-obeležene, treba ih proveriti multimetrom prema pinovima 4015 (MC14015:
-CLK A = 9, DATA A = 7, RESET A = 6, VSS = 8, VDD = 16).
+Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8) — korisnik
+meri samo to. Dimenzije stare ploče.
+
+**Ulaz modula — odluka korisnika:** raspored 5 žica se ne istražuje unapred.
+Na novoj ploči je 5-pinski konektor VDD_MOD / GND / DATA / CLK / RESET, a
+žice panela se kasnije rasporede u ženski konektor (MC14015: CLK A = 9,
+DATA A = 7, RESET A = 6, VSS = 8, VDD = 16). DATA/CLK/RESET idu preko
+**CD40109B** (VCC = 3,3 V, VDD = VDD_MOD), pa ista ploča radi i ako je
+VDD_MOD 5 V i ako je 9 V; VDD_MOD se bira kratkospojnikom. RESET drži
+pull-down (aktivan je na visokom nivou), ESP32 ga može pulsirati.
 
 Predlog za novu ploču (dok merenja ne potvrde):
 - Redovi: zadržati 8× 2N6388 na nosaču kao emiter-folowere. Baza preko
