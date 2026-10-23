@@ -91,16 +91,15 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
   to je oko 1,2 A / 64 ≈ 19 mA po LED-u u impulsu.
 - PCB se crta u **EasyEDA**.
 
-Otvoreno: napon napajanja 4015 na modulu (pin 16 prema pinu 8) — korisnik
-meri samo to. Dimenzije stare ploče.
+- **MC14015 radi na 5 V** (2026-10-23, korisnik: pin 16 je na izlazu
+  7805).
 
 **Ulaz modula — odluka korisnika:** raspored 5 žica se ne istražuje unapred.
-Na novoj ploči je 5-pinski konektor VDD_MOD / GND / DATA / CLK / RESET, a
+Na novoj ploči je 5-pinski konektor +5V / GND / DATA / CLK / RESET, a
 žice panela se kasnije rasporede u ženski konektor (MC14015: CLK A = 9,
 DATA A = 7, RESET A = 6, VSS = 8, VDD = 16). DATA/CLK/RESET idu preko
-**CD40109B** (VCC = 3,3 V, VDD = VDD_MOD), pa ista ploča radi i ako je
-VDD_MOD 5 V i ako je 9 V; VDD_MOD se bira kratkospojnikom. RESET drži
-pull-down (aktivan je na visokom nivou), ESP32 ga može pulsirati.
+**74AHCT125** na 5 V (CD40109B i kratkospojnik za 9 V više nisu potrebni).
+RESET drži pull-down (aktivan je na visokom nivou), ESP32 ga može pulsirati.
 
 Nova ploča: širina **90 mm** (žlebovi za logiku), dužina slobodna. Detaljan
 predlog šeme: `hardver/ploca.md`.

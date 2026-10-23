@@ -17,10 +17,9 @@ Ovo je predlog za crtanje; ništa još nije probano na panelu.
 ```
  9 V ─► J1 ─► Q1 (zaštita od obrnutog polariteta) ─► +9V ──┬─► C1 1000 µF
                                                             ├─► U1 buck 9→5 V ─► +5V ─► D1 ─► ESP32 5V
-                                                            ├─► JP1 (VDD_MOD = 5 V ili 9 V)
                                                             └─► J3 kolektori 2N6388
 
- ESP32 ─ SPI CLK/MOSI, RESET ─► U2 CD40109B ─► J2 modul (VDD_MOD, GND, DATA, CLK, RESET)
+ ESP32 ─ SPI CLK/MOSI, RESET ─► U2 74AHCT125 (5 V) ─► J2 modul (+5V, GND, DATA, CLK, RESET)
  ESP32 ─ ROW1..8 ─► U3 74HCT245 (5 V) ─► 8× 220 Ω ─► J3 baze 2N6388
  ESP32 ─ ROW_OE ─► /OE U3 (pull-up: isključeno pri paljenju)
 ```
@@ -35,12 +34,10 @@ Ovo je predlog za crtanje; ništa još nije probano na panelu.
 | C1 | 1000 µF / 16 V elektrolit + 100 nF | impulsi reda do ~1,2 A |
 | U1 | mini buck modul 9 → 5 V (MP1584EN, podesiv) ili AP63205WU na ploči | samo za logiku, ~0,5 A |
 | D1 | B5819W (Schottky) | 5 V → pin 5V DevKit-a; USB sa računara ne napaja ostatak ploče |
-| JP1 | 3-pin header + kratkospojnik | VDD_MOD = +5V ili +9V, prema izmerenom VDD na 4015 |
 
 ## ESP32
 
-ESP32 DevKitC (38 pinova, WROOM-32) u ženskim letvicama. 3V3 sa DevKit-a
-napaja CD40109B (strana VCC).
+ESP32 DevKitC (38 pinova, WROOM-32) u ženskim letvicama.
 
 | Signal | GPIO | Ide na |
 |---|---|---|
@@ -53,15 +50,20 @@ napaja CD40109B (strana VCC).
 
 Izbegnuti su pinovi fleša (6–11) i strapping pinovi 0, 2, 5, 12, 15.
 
-## Kolone — CD40109B (U2)
+## Kolone — 74AHCT125 (U2)
 
-- Strana VCC = 3,3 V (ulazi A–C od ESP32), strana VDD = VDD_MOD (izlazi
-  ka modulu). Ista ploča radi i za 5 V i za 9 V na modulu.
-- Ulazi DATA, CLK i RESET: 3 kanala, četvrti neiskorišćen (ulaz na GND).
-- Enable ulaze vezati tako da su izlazi uvek aktivni — proveriti u
-  datasheet-u na koju stranu napajanja se odnose.
+MC14015 na modulu radi na **5 V** (izmerio korisnik: pin 16 je na izlazu
+7805). Zato je dovoljan običan 3,3 → 5 V bafer; CD40109B nije potreban.
+
+- U2 = 74AHCT125 (ili 74HCT125) na +5V; ulazi prihvataju 3,3 V sa ESP32.
+- Kanali: DATA, CLK, RESET; četvrti neiskorišćen (ulaz na GND, /OE na +5V).
+- /OE ulazi korišćenih kanala na GND (uvek aktivni).
 - RESET: pull-down 100 kΩ na ESP32 strani.
-- 100 nF uz VCC i uz VDD.
+- Opciono 33–100 Ω redno na CLK i DATA ka konektoru (dugačak kabl kroz
+  ceo panel).
+- 100 nF uz VCC.
+- Pin +5V na J2: ako se pokaže da modul ima svoj 7805 (pa 5 V ne dolazi sa
+  logičke ploče), taj pin ostaje nepovezan.
 
 ## Redovi — 74HCT245 (U3) + postojeći 2N6388
 
@@ -89,7 +91,7 @@ napon ograničava struju. **Baze se ne smeju vući na 9 V**: red bi dobio
 | Oznaka | Pinovi | Tip |
 |---|---|---|
 | J1 | +9V, GND | DC utičnica + klema |
-| J2 | VDD_MOD, GND, DATA, CLK, RESET | JST-XH 5-pin |
+| J2 | +5V, GND, DATA, CLK, RESET | JST-XH 5-pin |
 | J3 | +9V (kolektori), BAZA1–BAZA8 | JST-XH 9-pin (ili 10 sa GND); +9V nosi do 1,2 A |
 
 Žice panela se kasnije rasporede u ženske konektore.
@@ -105,9 +107,11 @@ napon ograničava struju. **Baze se ne smeju vući na 9 V**: red bi dobio
 
 ## Šta još treba proveriti
 
-- VDD na 4015 (pin 16 prema pinu 8) na panelu B — određuje JP1.
-- Da je CDP1852 zaista radio na 5 V (pin 24 prema pinu 12 na panelu B).
-  Ako je bio na 9 V, U3 mora biti 4000-serija na 9 V, ne 74HCT.
+- ~~VDD na 4015~~ — izmereno: 5 V sa 7805.
+- Da je CDP1852 zaista radio na 5 V (pin 24 prema pinu 12). Vrlo
+  verovatno, jer je na ploči samo jedan 7805 („logike“), ali nije izmereno.
+- Gde je taj 7805: na logičkoj ploči (onda +5V na J2 napaja modul) ili na
+  modulu/panelu (onda +5V pin na J2 ostaje nepovezan).
 - Polaritet kolona: da li BC212 provodi kad je izlaz 4015 nizak (verovatno)
   — rešava se u firmware-u, bez izmene ploče.
 - Struja: na modulu nema otpornika za LED, pa prvo paliti uz izvor sa
