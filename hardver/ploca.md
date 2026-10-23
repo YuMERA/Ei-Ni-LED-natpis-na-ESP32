@@ -62,8 +62,8 @@ MC14015 na modulu radi na **5 V** (izmerio korisnik: pin 16 je na izlazu
 - Opciono 33–100 Ω redno na CLK i DATA ka konektoru (dugačak kabl kroz
   ceo panel).
 - 100 nF uz VCC.
-- Pin +5V na J2: ako se pokaže da modul ima svoj 7805 (pa 5 V ne dolazi sa
-  logičke ploče), taj pin ostaje nepovezan.
+- Pin +5V na J2 napaja 4015 na modulima — stari 7805 je bio na logičkoj
+  ploči, pa sada to radi naš buck (struja je mala, CMOS).
 
 ## Redovi — 74HCT245 (U3) + postojeći 2N6388
 
@@ -107,11 +107,9 @@ napon ograničava struju. **Baze se ne smeju vući na 9 V**: red bi dobio
 
 ## Šta još treba proveriti
 
-- ~~VDD na 4015~~ — izmereno: 5 V sa 7805.
-- Da je CDP1852 zaista radio na 5 V (pin 24 prema pinu 12). Vrlo
-  verovatno, jer je na ploči samo jedan 7805 („logike“), ali nije izmereno.
-- Gde je taj 7805: na logičkoj ploči (onda +5V na J2 napaja modul) ili na
-  modulu/panelu (onda +5V pin na J2 ostaje nepovezan).
+- ~~VDD na 4015~~ — izmereno: 5 V sa 7805 na logičkoj ploči. Pošto je to
+  jedini regulator, i CDP1852 koji je vukao baze redova radio je na 5 V —
+  74HCT245 na 5 V + 220 Ω ponavlja isti napon reda.
 - Polaritet kolona: da li BC212 provodi kad je izlaz 4015 nizak (verovatno)
   — rešava se u firmware-u, bez izmene ploče.
 - Struja: na modulu nema otpornika za LED, pa prvo paliti uz izvor sa

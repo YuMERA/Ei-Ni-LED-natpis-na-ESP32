@@ -92,7 +92,9 @@ Python/ImageMagick nisu instalirani. Slike koje stignu u chat su smanjene na
 - PCB se crta u **EasyEDA**.
 
 - **MC14015 radi na 5 V** (2026-10-23, korisnik: pin 16 je na izlazu
-  7805).
+  7805). Taj 7805 je na logičkoj ploči i jedini je regulator, pa je i
+  CDP1852 (koji je vukao baze redova) bio na 5 V — pitanje zatvoreno. Novu
+  ploču +5V na konektoru modula napaja naš buck.
 
 **Ulaz modula — odluka korisnika:** raspored 5 žica se ne istražuje unapred.
 Na novoj ploči je 5-pinski konektor +5V / GND / DATA / CLK / RESET, a
